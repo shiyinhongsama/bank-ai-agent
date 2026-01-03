@@ -3,7 +3,8 @@
 """
 
 from typing import List, Optional
-from pydantic import BaseSettings, validator
+from pydantic_settings import BaseSettings
+from pydantic import validator
 import os
 from pathlib import Path
 
@@ -47,7 +48,7 @@ class Settings(BaseSettings):
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS配置
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173"]
+    ALLOWED_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000", "http://localhost:5173"]
     ALLOWED_METHODS: List[str] = ["*"]
     ALLOWED_HEADERS: List[str] = ["*"]
     

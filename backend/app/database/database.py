@@ -3,12 +3,12 @@
 """
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 import logging
 
 from app.core.config import settings
+from app.database.models import Base
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +24,7 @@ engine = create_engine(
 # 创建会话工厂
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 创建基础模型类
-Base = declarative_base()
+# 统一使用 app.database.models 中的 Base，确保模型元数据一致
 
 def get_db():
     """获取数据库会话"""

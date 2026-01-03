@@ -2,7 +2,7 @@
 用户模型
 """
 
-from sqlalchemy import Column, String, Boolean, DateTime, Enum, Text
+from sqlalchemy import Column, String, Boolean, DateTime, Enum, Text, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -39,13 +39,13 @@ class User(BaseModel):
     verification_date = Column(DateTime(timezone=True))
     
     # 状态信息
-    status = Column(Enum(UserStatus), default=UserStatus.PENDING_VERIFICATION)
+    status = Column(Enum(UserStatus, name="user_status"), default=UserStatus.PENDING_VERIFICATION)
     last_login = Column(DateTime(timezone=True))
     failed_login_attempts = Column(Integer, default=0)
     locked_until = Column(DateTime(timezone=True))
     
     # 风险评估
-    risk_level = Column(Enum(RiskLevel), default=RiskLevel.MODERATE)
+    risk_level = Column(Enum(RiskLevel, name="user_risk_level"), default=RiskLevel.MODERATE)
     risk_assessment_date = Column(DateTime(timezone=True))
     
     # 其他信息

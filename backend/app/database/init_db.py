@@ -5,11 +5,12 @@
 import logging
 from sqlalchemy.orm import Session
 
-from app.database.database import engine, create_tables
-from app.models.user import User
-from app.models.account import Account, Transaction, Card
-from app.models.loan import LoanApplication, LoanProduct
-from app.models.investment import InvestmentProduct, InvestmentAccount
+from app.database.database import engine, create_tables, drop_tables
+from app.core.config import settings
+from app.models.user import User, RiskLevel as UserRiskLevel, UserStatus
+from app.models.account import Account, Transaction, Card, AccountType, AccountStatus, Currency
+from app.models.loan import LoanApplication, LoanProduct, LoanType
+from app.models.investment import InvestmentProduct, InvestmentAccount, InvestmentType, RiskLevel as InvestmentRiskLevel
 from app.models.conversation import Conversation, Message
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,9 @@ logger = logging.getLogger(__name__)
 async def init_db():
     """初始化数据库"""
     try:
-        # 创建所有表
+        # 开发环境重建表，避免枚举类型冲突
+        if settings.ENVIRONMENT == "development":
+            drop_tables()
         create_tables()
         
         # 创建初始数据
@@ -46,18 +49,22 @@ async def create_initial_data():
             full_name="演示用户",
             phone="13800138000",
             id_number="110101199001011234",
-            risk_level="moderate"
+            hashed_password="demo123",
+            is_verified=False,
+            status=UserStatus.PENDING_VERIFICATION,
+            risk_level=UserRiskLevel.MODERATE
         )
         db.add(test_user)
+        db.flush()  # 获取test_user.id
         
         # 创建测试账户
         test_account = Account(
-            user_id=1,
+            user_id=test_user.id,
             account_number="6226090000000123",
-            account_type="savings",
+            account_type=AccountType.SAVINGS,
+            currency=Currency.CNY,
             balance=125000.50,
-            currency="CNY",
-            status="active"
+            status=AccountStatus.ACTIVE
         )
         db.add(test_account)
         
@@ -65,10 +72,13 @@ async def create_initial_data():
         investment_product = InvestmentProduct(
             name="稳健增长型理财产品",
             product_code="INV001",
-            risk_level="low",
+            investment_type=InvestmentType.FUND,
+            risk_level=InvestmentRiskLevel.LOW,
             expected_return=3.5,
             min_investment=10000,
             max_investment=1000000,
+            currency="CNY",
+            min_term_months=1,
             description="低风险稳健型理财产品，适合保守型投资者"
         )
         db.add(investment_product)
@@ -77,11 +87,12 @@ async def create_initial_data():
         loan_product = LoanProduct(
             name="个人消费贷款",
             product_code="LOAN001",
-            loan_type="consumer",
-            max_amount=500000,
+            loan_type=LoanType.CONSUMER,
             min_amount=10000,
-            interest_rate=4.35,
+            max_amount=500000,
+            min_term_months=6,
             max_term_months=36,
+            interest_rate=4.35,
             description="用于个人消费的信用贷款产品"
         )
         db.add(loan_product)

@@ -88,7 +88,7 @@ class Message(BaseModel):
     read_at = Column(DateTime(timezone=True))
     
     # 附加信息
-    metadata = Column(JSON)  # 消息元数据，如置信度、情感分析等
+    message_metadata = Column(JSON)  # 消息元数据，如置信度、情感分析等
     
     # 关系
     conversation = relationship("Conversation", back_populates="messages")

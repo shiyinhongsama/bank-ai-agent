@@ -44,7 +44,7 @@ class LoanProduct(BaseModel):
     # 产品信息
     name = Column(String(200), nullable=False)
     product_code = Column(String(20), unique=True, index=True, nullable=False)
-    loan_type = Column(Enum(LoanType), nullable=False)
+    loan_type = Column(Enum(LoanType, name="loan_type"), nullable=False)
     
     # 贷款条件
     min_amount = Column(Float, nullable=False)
@@ -94,7 +94,7 @@ class LoanApplication(BaseModel):
     work_years = Column(Integer)
     
     # 申请状态
-    status = Column(Enum(ApplicationStatus), default=ApplicationStatus.SUBMITTED)
+    status = Column(Enum(ApplicationStatus, name="loan_application_status"), default=ApplicationStatus.SUBMITTED)
     submitted_at = Column(DateTime(timezone=True), server_default=func.now())
     reviewed_at = Column(DateTime(timezone=True))
     

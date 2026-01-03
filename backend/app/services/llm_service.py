@@ -61,18 +61,35 @@ class LLMService:
         provider: str = None
     ) -> Dict[str, Any]:
         """聊天完成"""
-        provider = provider or self.current_provider
+        provider = (provider or self.current_provider or "openai").lower()
+        # 根据提供商设置合理的默认模型
+        if provider == "minimax":
+            if not model or model == "gpt-3.5-turbo":
+                model = "abab6.5s-chat"
+        elif provider == "anthropic":
+            if not model or model == "gpt-3.5-turbo":
+                model = "claude-3-haiku-20240307"
         
         try:
             if provider == "openai" and self.openai_client:
                 return await self._openai_chat(messages, model, temperature, max_tokens)
-            elif provider == "anthropic" and self.anthropic_client:
+            if provider == "anthropic" and self.anthropic_client:
                 return await self._anthropic_chat(messages, model, temperature, max_tokens)
-            elif provider == "minimax" and self.minimax_config:
+            if provider == "minimax" and self.minimax_config:
                 return await self._minimax_chat(messages, model, temperature, max_tokens)
-            else:
-                # 回退到OpenAI
+
+            # 选择一个可用的提供商进行回退
+            if self.minimax_config:
+                if not model or model == "gpt-3.5-turbo":
+                    model = "abab6.5s-chat"
+                return await self._minimax_chat(messages, model, temperature, max_tokens)
+            if self.openai_client:
                 return await self._openai_chat(messages, model, temperature, max_tokens)
+            if self.anthropic_client:
+                return await self._anthropic_chat(messages, model, temperature, max_tokens)
+
+            # 如果没有任何提供商可用
+            raise Exception("未配置任何LLM提供商，请设置 MINIMAX_API_KEY 或其他密钥")
                 
         except Exception as e:
             logger.error(f"❌ LLM调用失败: {e}")
@@ -168,6 +185,9 @@ class LLMService:
     ) -> Dict[str, Any]:
         """MiniMax聊天"""
         try:
+            # 配置健壮性校验
+            if not self.minimax_config or not self.minimax_config.get("api_key") or not self.minimax_config.get("group_id"):
+                raise Exception("MiniMax 未配置 API key 或 GroupId")
             # 转换消息格式
             system_message = ""
             user_messages = []
@@ -176,9 +196,10 @@ class LLMService:
                 if msg["role"] == "system":
                     system_message += msg["content"] + "\n"
                 elif msg["role"] == "user":
-                    user_messages.append({"sender_type": "USER", "sender_name": "用户", "text": msg["content"]})
+                    # MiniMax chatcompletion_v2 采用 role/content 格式
+                    user_messages.append({"role": "user", "content": msg["content"]})
                 elif msg["role"] == "assistant":
-                    user_messages.append({"sender_type": "BOT", "sender_name": "助手", "text": msg["content"]})
+                    user_messages.append({"role": "assistant", "content": msg["content"]})
             
             # 如果没有用户消息，使用最后一条消息
             if not user_messages and messages:
@@ -209,10 +230,21 @@ class LLMService:
                 ) as response:
                     if response.status == 200:
                         result = await response.json()
-                        
-                        # 解析MiniMax响应格式
-                        choice = result.get("choices", [{}])[0]
-                        content = choice.get("messages", [{}])[0].get("text", "抱歉，无法生成回复。")
+                        # 解析MiniMax响应格式（更健壮）
+                        choices = result.get("choices") or []
+                        if not choices:
+                            logger.error(f"MiniMax 响应缺少 choices 字段: {result}")
+                            raise Exception("MiniMax 响应格式错误：缺少 choices")
+                        choice0 = choices[0]
+                        # 两种可能的返回结构：messages[] 或 message{}
+                        msgs = choice0.get("messages") or []
+                        content = None
+                        if msgs:
+                            content = msgs[0].get("text") or msgs[0].get("content")
+                        elif isinstance(choice0.get("message"), dict):
+                            content = choice0["message"].get("content") or choice0["message"].get("text")
+                        if not content:
+                            content = "抱歉，无法生成回复。"
                         
                         return {
                             "success": True,

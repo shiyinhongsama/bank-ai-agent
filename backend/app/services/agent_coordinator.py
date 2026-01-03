@@ -5,6 +5,8 @@ Agent协调器 - 多Agent调度和管理
 import logging
 import json
 from typing import Dict, Any, List, Optional, Tuple
+from sqlalchemy.orm import Session
+import re
 from datetime import datetime
 from enum import Enum
 
@@ -30,6 +32,7 @@ class AgentCapability(Enum):
     RISK_ASSESSMENT = "risk"          # 风险评估
     DOCUMENTATION = "documentation"   # 文档处理
     ESCALATION = "escalation"         # 升级处理
+    SECURITY = "security"             # 安全检查
 
 class BankAgent:
     """银行Agent基类"""
@@ -47,7 +50,8 @@ class BankAgent:
     async def process_message(
         self, 
         message: str, 
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
+        db: Session = None,
     ) -> Dict[str, Any]:
         """处理消息"""
         raise NotImplementedError
@@ -70,7 +74,8 @@ class GeneralAgent(BankAgent):
     async def process_message(
         self, 
         message: str, 
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
+        db: Session = None,
     ) -> Dict[str, Any]:
         """处理通用客服消息"""
         try:
@@ -85,10 +90,14 @@ class GeneralAgent(BankAgent):
             
             # 生成回复
             response = await llm_service.generate_banking_response(message, context_data)
+            response_text = (
+                response.get("content", "抱歉，我现在无法处理您的请求，请稍后再试。")
+                if isinstance(response, dict) else str(response)
+            )
             
             return {
                 "agent_type": self.agent_type.value,
-                "response": response,
+                "response": response_text,
                 "confidence": 0.8,
                 "actions": []
             }
@@ -121,25 +130,89 @@ class AccountAgent(BankAgent):
     async def process_message(
         self, 
         message: str, 
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
+        db: Session = None,
     ) -> Dict[str, Any]:
         """处理账户相关消息"""
         try:
-            # 搜索账户相关知识
+            # 1) 意图识别：余额查询
+            balance_keywords = ["查询余额", "余额查询", "查余额", "余额", "账户余额", "balance", "check balance", "query balance"]
+            if any(kw in message for kw in balance_keywords) and db is not None:
+                try:
+                    # 若上下文包含已登录用户，则优先按该用户查询
+                    user_id = None
+                    if context and isinstance(context, dict):
+                        user_id = context.get("user_id")
+
+                    # 尝试从消息中提取账号
+                    account_number_match = re.search(r"\b\d{12,20}\b", message)
+                    account_number = account_number_match.group(0) if account_number_match else None
+
+                    # 延迟导入模型以避免循环依赖
+                    from app.models.user import User
+                    from app.models.account import Account, Currency
+
+                    account: Optional[Account] = None
+                    if account_number:
+                        account = db.query(Account).filter(Account.account_number == account_number).first()
+
+                    if account is None and user_id:
+                        account = db.query(Account).filter(Account.user_id == user_id).first()
+
+                    if account is None:
+                        # 使用演示用户或首个账户作为默认查询对象
+                        demo_user = db.query(User).filter(User.username == "demo_user").first()
+                        if demo_user:
+                            account = db.query(Account).filter(Account.user_id == demo_user.id).first()
+                        if account is None:
+                            account = db.query(Account).first()
+
+                    if account is None:
+                        return {
+                            "agent_type": self.agent_type.value,
+                            "response": "未找到可查询的账户，请提供账号或登录后再试。",
+                            "confidence": 0.6,
+                            "actions": ["account_balance_query"],
+                        }
+
+                    currency = account.currency.value if hasattr(account.currency, "value") else str(account.currency)
+                    response_text = (
+                        f"账户 {account.account_number} 当前余额为 {account.balance:.2f} {currency}。"
+                    )
+
+                    return {
+                        "agent_type": self.agent_type.value,
+                        "response": response_text,
+                        "confidence": 0.95,
+                        "actions": ["account_balance_query"],
+                        "meta": {
+                            "account_id": account.id,
+                            "account_number": account.account_number,
+                            "currency": currency,
+                            "balance": account.balance,
+                        },
+                    }
+
+                except Exception as db_err:
+                    logger.error(f"❌ 余额查询数据库调用失败: {db_err}")
+                    # 如果函数调用失败，继续走知识/LLM路径
+
+            # 2) 默认路径：知识检索 + LLM 生成（直接使用原始消息，避免类别前缀影响匹配）
             knowledge_results = await vector_db_service.search_knowledge(
-                f"账户 {message}", limit=3
+                message, limit=5
             )
-            
             context_data = {
                 "knowledge_results": knowledge_results,
                 "conversation_history": context.get("conversation_history", []) if context else []
             }
-            
             response = await llm_service.generate_banking_response(message, context_data)
-            
+            response_text = (
+                response.get("content", "抱歉，我暂时无法处理账户相关问题，请联系人工客服。")
+                if isinstance(response, dict) else str(response)
+            )
             return {
                 "agent_type": self.agent_type.value,
-                "response": response,
+                "response": response_text,
                 "confidence": 0.9,
                 "actions": ["account_inquiry", "balance_check"]
             }
@@ -152,18 +225,27 @@ class AccountAgent(BankAgent):
                 "confidence": 0.0,
                 "error": str(e)
             }
-    
+
     def can_handle(self, message: str) -> float:
         """判断是否可以处理账户相关消息"""
-        account_keywords = ["账户", "余额", "存款", "取款", "流水", "账单", "卡"]
-        message_lower = message.lower()
-        
+        keywords = ["账户", "银行卡", "余额", "查询余额", "账户余额", "卡号", "balance", "check balance", "query balance"]
         score = 0.0
-        for keyword in account_keywords:
-            if keyword in message_lower:
-                score += 0.2
-        
-        return min(score, 1.0)
+        if any(kw in message for kw in keywords):
+            score = 0.85
+            # 对明确余额查询进一步加分
+            if any(kw in message for kw in ["查询余额", "余额查询", "查余额", "账户余额", "balance", "check balance", "query balance"]):
+                score = 0.95
+        return score
+    
+    def can_handle(self, message: str) -> float:
+        """判断是否可以处理账户相关消息（统一基于关键词的高置信度匹配）"""
+        keywords = ["账户", "银行卡", "余额", "查询余额", "账户余额", "卡号", "balance", "check balance", "query balance"]
+        score = 0.0
+        if any(kw in message for kw in keywords):
+            score = 0.85
+            if any(kw in message for kw in ["查询余额", "余额查询", "查余额", "账户余额", "balance", "check balance", "query balance"]):
+                score = 0.95
+        return score
 
 class TransferAgent(BankAgent):
     """转账专员Agent"""
@@ -179,12 +261,13 @@ class TransferAgent(BankAgent):
     async def process_message(
         self, 
         message: str, 
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
+        db: Session = None,
     ) -> Dict[str, Any]:
         """处理转账相关消息"""
         try:
             knowledge_results = await vector_db_service.search_knowledge(
-                f"转账 {message}", limit=3
+                message, limit=5
             )
             
             context_data = {
@@ -193,10 +276,14 @@ class TransferAgent(BankAgent):
             }
             
             response = await llm_service.generate_banking_response(message, context_data)
+            response_text = (
+                response.get("content", "抱歉，我暂时无法处理转账相关问题，请联系人工客服。")
+                if isinstance(response, dict) else str(response)
+            )
             
             return {
                 "agent_type": self.agent_type.value,
-                "response": response,
+                "response": response_text,
                 "confidence": 0.9,
                 "actions": ["transfer_guidance", "security_check"]
             }
@@ -236,12 +323,13 @@ class InvestmentAgent(BankAgent):
     async def process_message(
         self, 
         message: str, 
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
+        db: Session = None,
     ) -> Dict[str, Any]:
         """处理理财相关消息"""
         try:
             knowledge_results = await vector_db_service.search_knowledge(
-                f"理财 {message}", limit=3
+                message, limit=5
             )
             
             context_data = {
@@ -250,10 +338,14 @@ class InvestmentAgent(BankAgent):
             }
             
             response = await llm_service.generate_banking_response(message, context_data)
+            response_text = (
+                response.get("content", "抱歉，我暂时无法处理理财相关问题，请联系人工客服。")
+                if isinstance(response, dict) else str(response)
+            )
             
             return {
                 "agent_type": self.agent_type.value,
-                "response": response,
+                "response": response_text,
                 "confidence": 0.9,
                 "actions": ["product_recommendation", "risk_assessment"]
             }
@@ -293,12 +385,13 @@ class LoanAgent(BankAgent):
     async def process_message(
         self, 
         message: str, 
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
+        db: Session = None,
     ) -> Dict[str, Any]:
         """处理贷款相关消息"""
         try:
             knowledge_results = await vector_db_service.search_knowledge(
-                f"贷款 {message}", limit=3
+                message, limit=5
             )
             
             context_data = {
@@ -307,10 +400,14 @@ class LoanAgent(BankAgent):
             }
             
             response = await llm_service.generate_banking_response(message, context_data)
+            response_text = (
+                response.get("content", "抱歉，我暂时无法处理贷款相关问题，请联系人工客服。")
+                if isinstance(response, dict) else str(response)
+            )
             
             return {
                 "agent_type": self.agent_type.value,
-                "response": response,
+                "response": response_text,
                 "confidence": 0.9,
                 "actions": ["loan_application", "document_guidance"]
             }
@@ -357,7 +454,8 @@ class AgentCoordinator:
         self, 
         message: str, 
         conversation_id: str = None,
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
+        db: Session = None,
     ) -> Dict[str, Any]:
         """处理消息的主入口"""
         try:
@@ -365,7 +463,7 @@ class AgentCoordinator:
             best_agent = self._select_best_agent(message, context)
             
             # 处理消息
-            result = await best_agent.process_message(message, context)
+            result = await best_agent.process_message(message, context, db)
             
             # 记录对话状态
             if conversation_id:
@@ -400,6 +498,8 @@ class AgentCoordinator:
             
             agent_scores[agent_name] = score
         
+        logger.info(f"🎯 Agent适配度: {json.dumps(agent_scores, ensure_ascii=False)}")
+
         # 选择得分最高的Agent
         best_agent_name = max(agent_scores, key=agent_scores.get)
         best_agent = self.agents[best_agent_name]

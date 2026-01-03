@@ -80,3 +80,16 @@ async def search_knowledge(
     except Exception as e:
         logger.error(f"❌ 知识搜索失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/knowledge/rebuild")
+async def rebuild_knowledge_embeddings():
+    """重建知识集合嵌入（在切换嵌入模型后执行）。"""
+    try:
+        success = await vector_db_service.rebuild_embeddings()
+        if success:
+            return {"success": True, "message": "集合重建完成"}
+        else:
+            raise HTTPException(status_code=500, detail="集合重建失败")
+    except Exception as e:
+        logger.error(f"❌ 集合重建失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

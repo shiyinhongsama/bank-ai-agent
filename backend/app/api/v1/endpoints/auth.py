@@ -3,15 +3,17 @@
 """
 
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.database.database import get_db
+from app.models.user import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -31,8 +33,8 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
     full_name: str
-    phone: str = None
-    id_number: str = None
+    phone: Optional[str] = None
+    id_number: Optional[str] = None
 
 class UserResponse(BaseModel):
     """用户响应模型"""
@@ -40,7 +42,7 @@ class UserResponse(BaseModel):
     username: str
     email: str
     full_name: str
-    phone: str = None
+    phone: Optional[str] = None
     is_verified: bool
     created_at: datetime
 
@@ -64,7 +66,8 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    to_encode.update({"exp": expire})
+    # 将过期时间序列化为ISO字符串，避免json.dumps报错
+    to_encode.update({"exp": expire.isoformat()})
     encoded_jwt = base64.b64encode(json.dumps(to_encode).encode()).decode()
     return encoded_jwt
 
@@ -114,16 +117,31 @@ async def register(user_data: UserRegister):
         raise HTTPException(status_code=500, detail="注册失败")
 
 @router.post("/login", response_model=TokenResponse)
-async def login(user_data: UserLogin):
+async def login(user_data: UserLogin, db: Session = Depends(get_db)):
     """用户登录"""
     try:
-        # 验证用户（在实际项目中应该查询数据库）
+        # 优先检查内存用户
         user = fake_users_db.get(user_data.username)
-        if not user or user["hashed_password"] != user_data.password:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="用户名或密码错误"
-            )
+
+        # 若内存中不存在，则查询数据库中的演示用户
+        if not user:
+            db_user = db.query(User).filter(User.username == user_data.username).first()
+            if not db_user or db_user.hashed_password != user_data.password:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="用户名或密码错误"
+                )
+            # 统一返回结构
+            user = {
+                "id": db_user.id,
+                "username": db_user.username,
+                "email": db_user.email,
+                "full_name": db_user.full_name,
+                "phone": db_user.phone,
+                "hashed_password": db_user.hashed_password,
+                "is_verified": db_user.is_verified,
+                "created_at": db_user.created_at,
+            }
         
         # 创建访问令牌
         access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -162,7 +180,7 @@ async def logout():
     return {"message": "登出成功"}
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
     """获取当前用户信息"""
     try:
         # 验证令牌（在实际项目中应该验证JWT）
@@ -177,10 +195,21 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         except:
             raise HTTPException(status_code=401, detail="无效的令牌")
         
-        # 获取用户信息
+        # 获取用户信息（先查内存，再查数据库）
         user = fake_users_db.get(username)
         if not user:
-            raise HTTPException(status_code=404, detail="用户不存在")
+            db_user = db.query(User).filter(User.username == username).first()
+            if not db_user:
+                raise HTTPException(status_code=404, detail="用户不存在")
+            user = {
+                "id": db_user.id,
+                "username": db_user.username,
+                "email": db_user.email,
+                "full_name": db_user.full_name,
+                "phone": db_user.phone,
+                "is_verified": db_user.is_verified,
+                "created_at": db_user.created_at,
+            }
         
         return UserResponse(
             id=user["id"],

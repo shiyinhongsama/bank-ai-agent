@@ -37,10 +37,10 @@ class InvestmentProduct(BaseModel):
     # 产品信息
     name = Column(String(200), nullable=False)
     product_code = Column(String(20), unique=True, index=True, nullable=False)
-    investment_type = Column(Enum(InvestmentType), nullable=False)
+    investment_type = Column(Enum(InvestmentType, name="investment_type"), nullable=False)
     
     # 风险和收益
-    risk_level = Column(Enum(RiskLevel), nullable=False)
+    risk_level = Column(Enum(RiskLevel, name="investment_risk_level"), nullable=False)
     expected_return = Column(Float)  # 预期收益率（%）
     benchmark_return = Column(Float)  # 基准收益率（%）
     
