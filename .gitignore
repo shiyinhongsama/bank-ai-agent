@@ -1,0 +1,64 @@
+# OS/Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+*.dist-info/
+.venv/
+venv/
+ENV/
+build/
+dist/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.cache/
+.ruff_cache/
+
+# FastAPI uploads & temp
+backend/uploads/
+docker/backend/uploads/
+
+# Local databases (dev)
+*.db
+*.sqlite3
+
+# Node/Vite (frontend)
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.eslintcache
+.pnpm-store/
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+**/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/.env.test.local
+docker/.env
+
+# Docker/Nginx certificates
+docker/nginx/ssl/
+*.pem
+*.crt
+*.key
+
+# Logs
+logs/
+*.log

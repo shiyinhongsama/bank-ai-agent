@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
+  <!-- 数据流图 - 用户查询账户余额流程 -->
+  
+  <!-- 标题 -->
+  <text x="500" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#1f2937">
+    数据流图 - 用户查询账户余额流程
+  </text>
+  
+  <!-- 参与者 -->
+  <ellipse cx="100" cy="80" rx="60" ry="30" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="100" y="85" text-anchor="middle" font-size="12" fill="#1976d2">用户</text>
+  
+  <ellipse cx="100" cy="180" rx="60" ry="30" fill="#e8f5e8" stroke="#388e3c" stroke-width="2"/>
+  <text x="100" y="185" text-anchor="middle" font-size="12" fill="#388e3c">前端React</text>
+  
+  <ellipse cx="300" cy="180" rx="60" ry="30" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="300" y="185" text-anchor="middle" font-size="12" fill="#f57c00">API网关</text>
+  
+  <ellipse cx="500" cy="180" rx="60" ry="30" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="500" y="185" text-anchor="middle" font-size="12" fill="#c2185b">Agent协调器</text>
+  
+  <ellipse cx="700" cy="180" rx="60" ry="30" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="700" y="185" text-anchor="middle" font-size="12" fill="#7b1fa2">RAG系统</text>
+  
+  <ellipse cx="900" cy="180" rx="60" ry="30" fill="#e1f5fe" stroke="#0277bd" stroke-width="2"/>
+  <text x="900" y="185" text-anchor="middle" font-size="12" fill="#0277bd">大语言模型</text>
+  
+  <ellipse cx="500" cy="300" rx="60" ry="30" fill="#e8f5e8" stroke="#388e3c" stroke-width="2"/>
+  <text x="500" y="305" text-anchor="middle" font-size="12" fill="#388e3c">数据库</text>
+  
+  <ellipse cx="700" cy="300" rx="60" ry="30" fill="#e1f5fe" stroke="#0277bd" stroke-width="2"/>
+  <text x="700" y="305" text-anchor="middle" font-size="12" fill="#0277bd">向量数据库</text>
+  
+  <!-- 消息流 -->
+  <!-- 1. 用户输入查询 -->
+  <path d="M 160 80 L 40 150" stroke="#1976d2" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+  <text x="50" y="110" font-size="10" fill="#1976d2">输入"查询余额"</text>
+  
+  <!-- 2. 前端发送请求 -->
+  <path d="M 160 180 L 240 180" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="180" y="170" font-size="10" fill="#388e3c">POST /api/v1/chat/message</text>
+  
+  <!-- 3. API路由 -->
+  <path d="M 360 180 L 440 180" stroke="#f57c00" stroke-width="2" fill="none" marker-end="url(#arrow-orange)"/>
+  <text x="380" y="170" font-size="10" fill="#f57c00">路由到Agent协调器</text>
+  
+  <!-- 4. Agent处理 -->
+  <path d="M 560 180 L 560 240 L 500 240" stroke="#c2185b" stroke-width="2" fill="none" marker-end="url(#arrow-pink)"/>
+  <text x="520" y="220" font-size="10" fill="#c2185b">Agent选择算法</text>
+  
+  <!-- 5. 知识库检索 -->
+  <path d="M 500 210 L 500 240 L 640 240 L 640 210" stroke="#7b1fa2" stroke-width="2" fill="none" marker-end="url(#arrow-purple)"/>
+  <text x="520" y="230" font-size="10" fill="#7b1fa2">知识库检索</text>
+  
+  <!-- 6. 查询数据库 -->
+  <path d="M 500 210 L 500 270" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="510" y="240" font-size="10" fill="#388e3c">查询账户信息</text>
+  
+  <!-- 7. 数据库返回 -->
+  <path d="M 500 330 L 500 300" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="510" y="320" font-size="10" fill="#388e3c">返回余额数据</text>
+  
+  <!-- 8. 检索结果返回 -->
+  <path d="M 640 210 L 640 270 L 700 270 L 700 210" stroke="#7b1fa2" stroke-width="2" fill="none" marker-end="url(#arrow-purple)"/>
+  <text x="650" y="240" font-size="10" fill="#7b1fa2">检索结果</text>
+  
+  <!-- 9. LLM生成回复 -->
+  <path d="M 700 210 L 700 150 L 840 150" stroke="#0277bd" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+  <text x="720" y="170" font-size="10" fill="#0277bd">生成自然语言回复</text>
+  
+  <!-- 10. AI回复返回 -->
+  <path d="M 900 210 L 900 150 L 560 150 L 560 180" stroke="#0277bd" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+  <text x="720" y="160" font-size="10" fill="#0277bd">AI回复内容</text>
+  
+  <!-- 11. 返回结构化响应 -->
+  <path d="M 560 180 L 360 180" stroke="#c2185b" stroke-width="2" fill="none" marker-end="url(#arrow-pink)"/>
+  <text x="420" y="170" font-size="10" fill="#c2185b">返回结构化响应</text>
+  
+  <!-- 12. JSON响应 -->
+  <path d="M 240 180 L 160 180" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="180" y="170" font-size="10" fill="#388e3c">JSON响应</text>
+  
+  <!-- 13. 显示结果 -->
+  <path d="M 40 150 L 160 80" stroke="#1976d2" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+  <text x="50" y="110" font-size="10" fill="#1976d2">显示回复结果</text>
+  
+  <!-- 箭头定义 -->
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1976d2"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#388e3c"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f57c00"/>
+    </marker>
+    <marker id="arrow-pink" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#c2185b"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#7b1fa2"/>
+    </marker>
+  </defs>
+  
+  <!-- 流程说明 -->
+  <text x="500" y="380" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">
+    智能推荐流程
+  </text>
+  
+  <!-- 智能推荐流程 -->
+  <ellipse cx="100" cy="430" rx="60" ry="30" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="100" y="435" text-anchor="middle" font-size="12" fill="#1976d2">用户</text>
+  
+  <ellipse cx="300" cy="430" rx="60" ry="30" fill="#e8f5e8" stroke="#388e3c" stroke-width="2"/>
+  <text x="300" y="435" text-anchor="middle" font-size="12" fill="#388e3c">前端React</text>
+  
+  <ellipse cx="500" cy="430" rx="60" ry="30" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="500" y="435" text-anchor="middle" font-size="12" fill="#c2185b">Agent协调器</text>
+  
+  <ellipse cx="700" cy="430" rx="60" ry="30" fill="#e8f5e8" stroke="#388e3c" stroke-width="2"/>
+  <text x="700" y="435" text-anchor="middle" font-size="12" fill="#388e3c">数据库</text>
+  
+  <ellipse cx="900" cy="430" rx="60" ry="30" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="900" y="435" text-anchor="middle" font-size="12" fill="#7b1fa2">LLM</text>
+  
+  <!-- 智能推荐流程的消息流 -->
+  <path d="M 160 430 L 240 430" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="180" y="420" font-size="10" fill="#388e3c">询问理财产品</text>
+  
+  <path d="M 360 430 L 440 430" stroke="#c2185b" stroke-width="2" fill="none" marker-end="url(#arrow-pink)"/>
+  <text x="380" y="420" font-size="10" fill="#c2185b">Agent协调器处理</text>
+  
+  <path d="M 560 430 L 560 480 L 640 480 L 640 460" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="570" y="460" font-size="10" fill="#388e3c">查询用户画像</text>
+  
+  <path d="M 640 460 L 640 480 L 700 480 L 700 460" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="650" y="470" font-size="10" fill="#388e3c">检索相关知识</text>
+  
+  <path d="M 700 460 L 700 480 L 840 480 L 840 460" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="720" y="470" font-size="10" fill="#388e3c">风险评估算法</text>
+  
+  <path d="M 900 460 L 900 480 L 560 480 L 560 430" stroke="#7b1fa2" stroke-width="2" fill="none" marker-end="url(#arrow-purple)"/>
+  <text x="720" y="500" font-size="10" fill="#7b1fa2">生成个性化推荐</text>
+  
+  <!-- 说明文字 -->
+  <text x="500" y="620" text-anchor="middle" font-size="12" fill="#666">
+    本数据流展示了用户交互的完整过程，从前端输入到AI处理再到结果返回，体现了系统的实时性和智能化特点
+  </text>
+</svg>

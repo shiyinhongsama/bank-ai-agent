@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- 技术栈架构图 -->
+  
+  <!-- 标题 -->
+  <text x="600" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1f2937">
+    银行AI智能体应用 - 技术栈架构
+  </text>
+  
+  <!-- 前端技术栈 -->
+  <rect x="50" y="60" width="250" height="200" fill="#2196f3" stroke="#0d47a1" stroke-width="2" rx="8"/>
+  <text x="175" y="85" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">前端技术栈</text>
+  
+  <rect x="70" y="110" width="210" height="30" fill="#1565c0" rx="4"/>
+  <text x="175" y="130" text-anchor="middle" font-size="12" fill="#fff">React 18 - 组件化开发</text>
+  
+  <rect x="70" y="150" width="210" height="25" fill="#1565c0" rx="4"/>
+  <text x="175" y="167" text-anchor="middle" font-size="12" fill="#fff">TypeScript - 类型安全</text>
+  
+  <rect x="70" y="185" width="210" height="25" fill="#1565c0" rx="4"/>
+  <text x="175" y="202" text-anchor="middle" font-size="12" fill="#fff">Tailwind CSS - 原子化CSS</text>
+  
+  <rect x="70" y="220" width="210" height="25" fill="#1565c0" rx="4"/>
+  <text x="175" y="237" text-anchor="middle" font-size="12" fill="#fff">Framer Motion - 动画效果</text>
+  
+  <!-- 后端技术栈 -->
+  <rect x="350" y="60" width="250" height="200" fill="#4caf50" stroke="#1b5e20" stroke-width="2" rx="8"/>
+  <text x="475" y="85" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">后端技术栈</text>
+  
+  <rect x="370" y="110" width="210" height="30" fill="#388e3c" rx="4"/>
+  <text x="475" y="130" text-anchor="middle" font-size="12" fill="#fff">FastAPI - Web框架</text>
+  
+  <rect x="370" y="150" width="210" height="25" fill="#388e3c" rx="4"/>
+  <text x="475" y="167" text-anchor="middle" font-size="12" fill="#fff">Python 3.11 - 编程语言</text>
+  
+  <rect x="370" y="185" width="210" height="25" fill="#388e3c" rx="4"/>
+  <text x="475" y="202" text-anchor="middle" font-size="12" fill="#fff">SQLAlchemy - ORM框架</text>
+  
+  <rect x="370" y="220" width="210" height="25" fill="#388e3c" rx="4"/>
+  <text x="475" y="237" text-anchor="middle" font-size="12" fill="#fff">JWT - 身份认证</text>
+  
+  <!-- 数据库技术栈 -->
+  <rect x="650" y="60" width="250" height="200" fill="#ff9800" stroke="#e65100" stroke-width="2" rx="8"/>
+  <text x="775" y="85" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">数据库技术栈</text>
+  
+  <rect x="670" y="110" width="210" height="30" fill="#f57c00" rx="4"/>
+  <text x="775" y="130" text-anchor="middle" font-size="12" fill="#fff">PostgreSQL 14 - 关系型数据库</text>
+  
+  <rect x="670" y="150" width="210" height="25" fill="#f57c00" rx="4"/>
+  <text x="775" y="167" text-anchor="middle" font-size="12" fill="#fff">Redis 7 - 缓存数据库</text>
+  
+  <rect x="670" y="185" width="210" height="25" fill="#f57c00" rx="4"/>
+  <text x="775" y="202" text-anchor="middle" font-size="12" fill="#fff">Chroma - 向量数据库</text>
+  
+  <rect x="670" y="220" width="210" height="25" fill="#f57c00" rx="4"/>
+  <text x="775" y="237" text-anchor="middle" font-size="12" fill="#fff">连接池 - 性能优化</text>
+  
+  <!-- AI技术栈 -->
+  <rect x="50" y="300" width="250" height="200" fill="#9c27b0" stroke="#4a148c" stroke-width="2" rx="8"/>
+  <text x="175" y="325" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">AI技术栈</text>
+  
+  <rect x="70" y="350" width="210" height="30" fill="#7b1fa2" rx="4"/>
+  <text x="175" y="370" text-anchor="middle" font-size="12" fill="#fff">LangChain - AI应用框架</text>
+  
+  <rect x="70" y="390" width="210" height="25" fill="#7b1fa2" rx="4"/>
+  <text x="175" y="407" text-anchor="middle" font-size="12" fill="#fff">LangGraph - Agent编排</text>
+  
+  <rect x="70" y="425" width="210" height="25" fill="#7b1fa2" rx="4"/>
+  <text x="175" y="442" text-anchor="middle" font-size="12" fill="#fff">OpenAI GPT - 大语言模型</text>
+  
+  <rect x="70" y="460" width="210" height="25" fill="#7b1fa2" rx="4"/>
+  <text x="175" y="477" text-anchor="middle" font-size="12" fill="#fff">向量嵌入 - 语义搜索</text>
+  
+  <rect x="70" y="495" width="210" height="25" fill="#7b1fa2" rx="4"/>
+  <text x="175" y="512" text-anchor="middle" font-size="12" fill="#fff">RAG检索 - 知识增强</text>
+  
+  <!-- 基础设施技术栈 -->
+  <rect x="350" y="300" width="250" height="200" fill="#f44336" stroke="#b71c1c" stroke-width="2" rx="8"/>
+  <text x="475" y="325" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">基础设施</text>
+  
+  <rect x="370" y="350" width="210" height="30" fill="#d32f2f" rx="4"/>
+  <text x="475" y="370" text-anchor="middle" font-size="12" fill="#fff">Docker - 容器化</text>
+  
+  <rect x="370" y="390" width="210" height="25" fill="#d32f2f" rx="4"/>
+  <text x="475" y="407" text-anchor="middle" font-size="12" fill="#fff">Docker Compose - 编排工具</text>
+  
+  <rect x="370" y="425" width="210" height="25" fill="#d32f2f" rx="4"/>
+  <text x="475" y="442" text-anchor="middle" font-size="12" fill="#fff">Nginx - 反向代理</text>
+  
+  <rect x="370" y="460" width="210" height="25" fill="#d32f2f" rx="4"/>
+  <text x="475" y="477" text-anchor="middle" font-size="12" fill="#fff">Linux - 操作系统</text>
+  
+  <rect x="370" y="495" width="210" height="25" fill="#d32f2f" rx="4"/>
+  <text x="475" y="512" text-anchor="middle" font-size="12" fill="#fff">监控日志 - 系统监控</text>
+  
+  <!-- 实时通信技术栈 -->
+  <rect x="650" y="300" width="250" height="200" fill="#00bcd4" stroke="#006064" stroke-width="2" rx="8"/>
+  <text x="775" y="325" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">实时通信技术栈</text>
+  
+  <rect x="670" y="350" width="210" height="30" fill="#0097a7" rx="4"/>
+  <text x="775" y="370" text-anchor="middle" font-size="12" fill="#fff">WebSocket - 双向通信</text>
+  
+  <rect x="670" y="390" width="210" height="25" fill="#0097a7" rx="4"/>
+  <text x="775" y="407" text-anchor="middle" font-size="12" fill="#fff">Socket.io Client - WebSocket包装</text>
+  
+  <rect x="670" y="425" width="210" height="25" fill="#0097a7" rx="4"/>
+  <text x="775" y="442" text-anchor="middle" font-size="12" fill="#fff">实时数据流 - 低延迟</text>
+  
+  <rect x="670" y="460" width="210" height="25" fill="#0097a7" rx="4"/>
+  <text x="775" y="477" text-anchor="middle" font-size="12" fill="#fff">消息队列 - 异步处理</text>
+  
+  <rect x="670" y="495" width="210" height="25" fill="#0097a7" rx="4"/>
+  <text x="775" y="512" text-anchor="middle" font-size="12" fill="#fff">事件驱动 - 响应式架构</text>
+  
+  <!-- 连接线表示技术栈之间的关系 -->
+  <!-- 前端到后端 -->
+  <line x1="300" y1="160" x2="350" y2="160" stroke="#666" stroke-width="2" stroke-dasharray="5,5"/>
+  
+  <!-- 后端到数据库 -->
+  <line x1="600" y1="160" x2="650" y2="160" stroke="#666" stroke-width="2" stroke-dasharray="5,5"/>
+  
+  <!-- 后端到AI -->
+  <line x1="475" y1="260" x2="475" y2="300" stroke="#666" stroke-width="2" stroke-dasharray="5,5"/>
+  
+  <!-- 后端到基础设施 -->
+  <line x1="475" y1="260" x2="475" y2="300" stroke="#666" stroke-width="2" stroke-dasharray="5,5"/>
+  
+  <!-- 实时通信贯穿各层 -->
+  <line x1="300" y1="200" x2="900" y2="200" stroke="#00bcd4" stroke-width="3" opacity="0.6"/>
+  
+  <!-- 说明文字 -->
+  <text x="600" y="560" text-anchor="middle" font-size="12" fill="#666">
+    本技术栈采用现代化设计，前端注重用户体验，后端追求高性能，AI服务提供智能化能力，基础设施保证系统稳定性
+  </text>
+</svg>
